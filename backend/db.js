@@ -9,6 +9,7 @@ db.serialize(() => {
       name TEXT,
       amount REAL NOT NULL,
       message TEXT,
+      email TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);

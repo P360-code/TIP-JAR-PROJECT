@@ -4,20 +4,42 @@ async function sendTip() {
   const name = document.getElementById("name").value;
   const amount = document.getElementById("amount").value;
   const message = document.getElementById("message").value;
+  const email = document.getElementById("email").value;
 
-  await fetch(`${API_URL}/tips`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, amount, message })
-  });
+  if (!amount || isNaN(amount) || Number(amount) <= 0) {
+    alert("Please enter a valid positive amount.");
+    return;
+  }
 
-  loadTotal();
-  loadTips();
-  
-  // Clear input fields
-  document.getElementById("name").value = "";
-  document.getElementById("amount").value = "";
-  document.getElementById("message").value = "";
+  try {
+    const response = await fetch(`${API_URL}/tips`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, amount, message, email })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("Error sending tip:", error);
+      alert(`Error: ${error.error || "Failed to send tip"}`);
+      return;
+    }
+
+    const result = await response.json();
+    console.log("Tip sent successfully:", result);
+
+    loadTotal();
+    loadTips();
+    
+    // Clear input fields
+    document.getElementById("name").value = "";
+    document.getElementById("amount").value = "";
+    document.getElementById("message").value = "";
+    document.getElementById("email").value = "";
+  } catch (error) {
+    console.error("Network error:", error);
+    alert("Failed to connect to server. Is the backend running?");
+  }
 }
 
 async function loadTotal() {

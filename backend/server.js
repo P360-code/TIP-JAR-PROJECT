@@ -8,18 +8,22 @@ app.use(express.json());
 
 /* Add a tip */
 app.post("/tips", (req, res) => {
-  const { name, amount, message } = req.body;
+  const { name, amount, message, email } = req.body;
 
-  if (!amount) {
-    return res.status(400).json({ error: "Amount is required" });
+  if (!amount || isNaN(amount) || Number(amount) <= 0) {
+    return res.status(400).json({ error: "Valid positive amount is required" });
   }
 
   db.run(
-    `INSERT INTO tips (name, amount, message) VALUES (?, ?, ?)`,
-    [name || "Anonymous", amount, message],
+    `INSERT INTO tips (name, amount, message, email) VALUES (?, ?, ?, ?)`,
+    [name || "Anonymous", amount, message, email],
     function (err) {
-      if (err) return res.status(500).json(err);
-      res.json({ success: true, id: this.lastID });
+      if (err) {
+        console.error("Database insert error:", err);
+        return res.status(500).json({ error: err.message });
+      }
+      console.log("Tip added successfully, ID:", this.lastID);
+      res.status(201).json({ success: true, id: this.lastID });
     }
   );
 });
